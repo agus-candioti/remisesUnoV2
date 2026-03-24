@@ -83,6 +83,12 @@ export default function SolicitudesPage() {
   }
 
   async function handleFinalizarViaje(s) {
+    if (!s.precioEstimado) {
+      const ok = window.confirm(
+        'Este viaje no tiene precio asignado.\nSi finalizás ahora, no se acreditará ningún monto al saldo del chofer.\n\n¿Querés asignar un precio primero, o finalizar sin registrar ingresos?'
+      )
+      if (!ok) return
+    }
     setActionLoading(true)
     try { await finalizarViaje(s) }
     finally { setActionLoading(false) }

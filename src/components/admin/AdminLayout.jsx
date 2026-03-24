@@ -4,11 +4,15 @@ import Sidebar from './Sidebar.jsx'
 import ThemeToggle from '../common/ThemeToggle.jsx'
 import Button from '../common/Button.jsx'
 import { useAuth } from '../../hooks/useAuth.js'
+import { SolicitudesProvider, useSolicitudesCtx } from '../../context/SolicitudesContext.jsx'
 import styles from './AdminLayout.module.css'
 
-export default function AdminLayout() {
-  const { logout, user } = useAuth()
+function AdminLayoutInner() {
+  const { logout } = useAuth()
+  const { solicitudes } = useSolicitudesCtx() ?? { solicitudes: [] }
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const pendingCount = solicitudes.filter(s => s.estado === 'pending').length
 
   async function handleLogout() {
     await logout()
@@ -16,22 +20,18 @@ export default function AdminLayout() {
 
   return (
     <div className={styles.shell}>
-      {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div
-          className={styles.overlay}
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className={styles.overlay} onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Sidebar */}
       <div className={`${styles.sidebarWrapper} ${sidebarOpen ? styles.open : ''}`}>
-        <Sidebar onClose={() => setSidebarOpen(false)} />
+        <Sidebar
+          onClose={() => setSidebarOpen(false)}
+          pendingCount={pendingCount}
+        />
       </div>
 
-      {/* Main area */}
       <div className={styles.main}>
-        {/* Top bar */}
         <header className={styles.topbar}>
           <button
             className={styles.menuBtn}
@@ -47,11 +47,18 @@ export default function AdminLayout() {
           </Button>
         </header>
 
-        {/* Page content */}
         <div className={styles.content}>
           <Outlet />
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AdminLayout() {
+  return (
+    <SolicitudesProvider>
+      <AdminLayoutInner />
+    </SolicitudesProvider>
   )
 }

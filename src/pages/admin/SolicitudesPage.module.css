@@ -107,12 +107,18 @@
 }
 .table tr:last-child td { border-bottom: none; }
 
-.pasajeroLink {
-  font-weight: 500;
+/* Whole row is clickable */
+.trow {
   cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.trow:hover td {
+  background: var(--color-surface-hover);
+}
+
+.pasajeroCell {
+  font-weight: 600;
   color: var(--color-brand);
-  text-decoration: underline;
-  text-decoration-style: dotted;
 }
 
 .route {

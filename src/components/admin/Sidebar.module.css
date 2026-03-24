@@ -57,6 +57,11 @@
   color: var(--color-text-muted);
   text-decoration: none;
   transition: background var(--transition-fast), color var(--transition-fast);
+  position: relative;
+}
+
+.linkLabel {
+  flex: 1;
 }
 
 .link:hover {
@@ -76,6 +81,41 @@
 
 .icon {
   font-size: 1rem;
+}
+
+/* Pending count badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  background: var(--color-pending);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: var(--font-heading);
+  line-height: 1;
+  transition: transform var(--transition-fast);
+}
+
+.badgePulse {
+  animation: badgePop 0.4s ease forwards, badgeGlow 2s ease forwards;
+}
+
+@keyframes badgePop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.4); }
+  70%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+@keyframes badgeGlow {
+  0%   { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+  60%  { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
 }
 
 .version {

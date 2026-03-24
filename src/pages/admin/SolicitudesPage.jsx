@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSolicitudes } from '../../hooks/useSolicitudes.js'
+import { useSolicitudesCtx } from '../../context/SolicitudesContext.jsx'
 import { useChoferes } from '../../hooks/useChoferes.js'
 import { useZonas } from '../../hooks/useZonas.js'
 import StatusBadge from '../../components/common/StatusBadge.jsx'
@@ -7,6 +7,7 @@ import Button from '../../components/common/Button.jsx'
 import Modal from '../../components/common/Modal.jsx'
 import Select from '../../components/common/Select.jsx'
 import LoadingSpinner from '../../components/common/LoadingSpinner.jsx'
+import SolicitudDetailModal from '../../components/admin/SolicitudDetailModal.jsx'
 import { notifyDriverLink } from '../../services/whatsapp.js'
 import { formatPrice } from '../../services/priceCalculator.js'
 import styles from './SolicitudesPage.module.css'
@@ -29,36 +30,39 @@ function formatTs(ts) {
 }
 
 export default function SolicitudesPage() {
-  const { solicitudes, loading, updateEstado, assignDriver, assignZona } = useSolicitudes()
+  const { solicitudes, loading, updateEstado, assignDriver, assignZona } = useSolicitudesCtx()
   const { choferes } = useChoferes()
   const { zonas } = useZonas()
 
   const [filterEstado, setFilterEstado] = useState('todos')
   const [filterFecha, setFilterFecha] = useState('')
+
+  // Detail modal
   const [selected, setSelected] = useState(null)
-  const [dispatchModal, setDispatchModal] = useState(null) // solicitud being dispatched
+
+  // Dispatch modal
+  const [dispatchModal, setDispatchModal] = useState(null)
   const [dispatchChoferId, setDispatchChoferId] = useState('')
+
+  // Zone assignment modal
   const [zonaModal, setZonaModal] = useState(null)
   const [selectedZonaId, setSelectedZonaId] = useState('')
+
   const [actionLoading, setActionLoading] = useState(false)
 
   const filtered = solicitudes.filter(s => {
     if (filterEstado !== 'todos' && s.estado !== filterEstado) return false
     if (filterFecha) {
       const d = s.fecha?.toDate ? s.fecha.toDate() : new Date(s.fecha)
-      const dStr = d.toISOString().split('T')[0]
-      if (dStr !== filterFecha) return false
+      if (d.toISOString().split('T')[0] !== filterFecha) return false
     }
     return true
   })
 
-  async function handleEstado(s, newEstado) {
+  async function handleEstado(id, newEstado) {
     setActionLoading(true)
-    try {
-      await updateEstado(s.id, newEstado)
-    } finally {
-      setActionLoading(false)
-    }
+    try { await updateEstado(id, newEstado) }
+    finally { setActionLoading(false) }
   }
 
   async function handleDispatch() {
@@ -85,6 +89,11 @@ export default function SolicitudesPage() {
     } finally {
       setActionLoading(false)
     }
+  }
+
+  function openDispatch(s) {
+    setDispatchModal(s)
+    setDispatchChoferId(s.choferAsignado ?? '')
   }
 
   if (loading) {
@@ -139,50 +148,44 @@ export default function SolicitudesPage() {
             </thead>
             <tbody>
               {filtered.map(s => (
-                <tr key={s.id}>
-                  <td>
-                    <span
-                      className={styles.pasajeroLink}
-                      onClick={() => setSelected(s)}
-                      title="Ver detalle"
-                    >
-                      {s.pasajero}
-                    </span>
-                  </td>
+                <tr key={s.id} className={styles.trow} onClick={() => setSelected(s)}>
+                  <td className={styles.pasajeroCell}>{s.pasajero}</td>
                   <td>{s.telefono}</td>
                   <td className={styles.route}>{s.origen} → {s.destino}</td>
                   <td className={styles.date}>{formatTs(s.fecha)}</td>
                   <td>
                     {s.precioEstimado
                       ? formatPrice(s.precioEstimado)
-                      : <button
+                      : (
+                        <button
                           className={styles.assignZona}
-                          onClick={() => { setZonaModal(s); setSelectedZonaId(s.zonaId ?? '') }}
+                          onClick={e => { e.stopPropagation(); setZonaModal(s); setSelectedZonaId(s.zonaId ?? '') }}
                         >
                           + Zona
                         </button>
+                      )
                     }
                   </td>
                   <td><StatusBadge estado={s.estado} /></td>
-                  <td>
+                  <td onClick={e => e.stopPropagation()}>
                     <div className={styles.actions}>
                       {s.estado === 'pending' && (
-                        <Button size="sm" onClick={() => { setDispatchModal(s); setDispatchChoferId(s.choferAsignado ?? '') }}>
+                        <Button size="sm" onClick={() => openDispatch(s)}>
                           Aprobar
                         </Button>
                       )}
                       {s.estado === 'approved' && (
-                        <Button size="sm" variant="secondary" onClick={() => handleEstado(s, 'dispatched')}>
+                        <Button size="sm" variant="secondary" onClick={() => handleEstado(s.id, 'dispatched')}>
                           Despachar
                         </Button>
                       )}
                       {s.estado === 'dispatched' && (
-                        <Button size="sm" variant="secondary" onClick={() => handleEstado(s, 'finished')}>
+                        <Button size="sm" variant="secondary" onClick={() => handleEstado(s.id, 'finished')}>
                           Finalizar
                         </Button>
                       )}
                       {!['finished', 'cancelled'].includes(s.estado) && (
-                        <Button size="sm" variant="danger" onClick={() => handleEstado(s, 'cancelled')}>
+                        <Button size="sm" variant="danger" onClick={() => handleEstado(s.id, 'cancelled')}>
                           Cancelar
                         </Button>
                       )}
@@ -195,29 +198,15 @@ export default function SolicitudesPage() {
         </div>
       )}
 
-      {/* Detail modal */}
+      {/* Rich detail modal */}
       {selected && (
-        <Modal title="Detalle de solicitud" onClose={() => setSelected(null)} size="md">
-          <dl className={styles.detail}>
-            {[
-              ['ID', selected.id],
-              ['Pasajero', selected.pasajero],
-              ['Teléfono', selected.telefono],
-              ['Origen', selected.origen],
-              ['Destino', selected.destino],
-              ['Fecha', formatTs(selected.fecha)],
-              ['Estado', <StatusBadge key="st" estado={selected.estado} />],
-              ['Chofer', selected.choferNombre || '—'],
-              ['Precio', formatPrice(selected.precioEstimado)],
-              ['Notas', selected.notas || '—'],
-            ].map(([k, v]) => (
-              <div key={k} className={styles.detailRow}>
-                <dt>{k}</dt>
-                <dd>{v}</dd>
-              </div>
-            ))}
-          </dl>
-        </Modal>
+        <SolicitudDetailModal
+          solicitud={selected}
+          choferes={choferes}
+          onClose={() => setSelected(null)}
+          onEstado={(id, estado) => { handleEstado(id, estado); setSelected(null) }}
+          onOpenDispatch={s => { setSelected(null); openDispatch(s) }}
+        />
       )}
 
       {/* Dispatch / assign driver modal */}
@@ -262,7 +251,7 @@ export default function SolicitudesPage() {
         </Modal>
       )}
 
-      {/* Zona assignment modal */}
+      {/* Zone assignment modal */}
       {zonaModal && (
         <Modal title="Asignar zona y precio" onClose={() => setZonaModal(null)} size="sm">
           <div className={styles.modalForm}>

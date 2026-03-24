@@ -22,11 +22,16 @@ const ESTADO_LABELS = {
   cancelled: 'Cancelada',
 }
 
-function formatTs(ts) {
+function formatTs(ts, tipo) {
+  if (tipo === 'ahora') return '⚡ Ahora'
   if (!ts) return ''
   const d = ts.toDate ? ts.toDate() : new Date(ts)
-  return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
-    ' ' + d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+  const time = d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+  const today = new Date()
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1)
+  if (d.toDateString() === today.toDateString()) return `Hoy — ${time}`
+  if (d.toDateString() === tomorrow.toDateString()) return `Mañana — ${time}`
+  return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' — ' + time
 }
 
 export default function SolicitudesPage() {
@@ -152,7 +157,7 @@ export default function SolicitudesPage() {
                   <td className={styles.pasajeroCell}>{s.pasajero}</td>
                   <td>{s.telefono}</td>
                   <td className={styles.route}>{s.origen} → {s.destino}</td>
-                  <td className={styles.date}>{formatTs(s.fecha)}</td>
+                  <td className={styles.date}>{formatTs(s.fecha, s.tipo)}</td>
                   <td>
                     {s.precioEstimado
                       ? formatPrice(s.precioEstimado)
@@ -233,13 +238,14 @@ export default function SolicitudesPage() {
             {dispatchChoferId && (() => {
               const c = choferes.find(ch => ch.id === dispatchChoferId)
               if (!c) return null
+              const isAhora = dispatchModal.tipo === 'ahora'
               const waLink = notifyDriverLink(c.telefono, {
                 pasajero: dispatchModal.pasajero,
                 telefono: dispatchModal.telefono,
                 origen: dispatchModal.origen,
                 destino: dispatchModal.destino,
-                fecha: dispatchModal.fecha?.toDate ? dispatchModal.fecha.toDate().toLocaleDateString('es-AR') : '',
-                hora: dispatchModal.fecha?.toDate ? dispatchModal.fecha.toDate().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : '',
+                fecha: isAhora ? 'Ahora' : (dispatchModal.fecha?.toDate ? dispatchModal.fecha.toDate().toLocaleDateString('es-AR') : ''),
+                hora: isAhora ? '' : (dispatchModal.fecha?.toDate ? dispatchModal.fecha.toDate().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : ''),
               })
               return (
                 <a href={waLink} target="_blank" rel="noopener noreferrer" className={styles.waLink}>

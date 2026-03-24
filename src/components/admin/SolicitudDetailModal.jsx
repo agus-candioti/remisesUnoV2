@@ -5,18 +5,30 @@ import { formatPrice } from '../../services/priceCalculator.js'
 import { buildWhatsAppLink, notifyDriverLink } from '../../services/whatsapp.js'
 import styles from './SolicitudDetailModal.module.css'
 
-function formatTs(ts) {
+function formatTs(ts, tipo) {
+  if (tipo === 'ahora') return '⚡ Ahora mismo'
   if (!ts) return '—'
   const d = ts.toDate ? ts.toDate() : new Date(ts)
+  const time = d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+  const today = new Date()
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1)
+  if (d.toDateString() === today.toDateString()) return `Hoy — ${time}`
+  if (d.toDateString() === tomorrow.toDateString()) return `Mañana — ${time}`
   return d.toLocaleDateString('es-AR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }) +
-    ' — ' + d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+    ' — ' + time
 }
 
 function customerWaLink(s) {
-  const fecha = s.fecha?.toDate ? s.fecha.toDate().toLocaleDateString('es-AR') : ''
-  const hora  = s.fecha?.toDate ? s.fecha.toDate().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : ''
+  let ref
+  if (s.tipo === 'ahora') {
+    ref = 'tu solicitud inmediata'
+  } else {
+    const fecha = s.fecha?.toDate ? s.fecha.toDate().toLocaleDateString('es-AR') : ''
+    const hora  = s.fecha?.toDate ? s.fecha.toDate().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : ''
+    ref = `tu reserva del ${fecha} a las ${hora}`
+  }
   const msg =
-    `Hola ${s.pasajero}, te contactamos desde *UNO Remises* en relación a tu reserva del ${fecha} a las ${hora}.\n\n` +
+    `Hola ${s.pasajero}, te contactamos desde *UNO Remises* en relación a ${ref}.\n\n` +
     `📍 *Origen:* ${s.origen}\n` +
     `🏁 *Destino:* ${s.destino}`
   return buildWhatsAppLink(s.telefono.replace(/\D/g, ''), msg)
@@ -73,7 +85,7 @@ export default function SolicitudDetailModal({ solicitud: s, choferes, onClose, 
         <div className={styles.metaGrid}>
           <div className={styles.metaItem}>
             <span className={styles.metaLabel}>Fecha y hora</span>
-            <span className={styles.metaValue}>{formatTs(s.fecha)}</span>
+            <span className={styles.metaValue}>{formatTs(s.fecha, s.tipo)}</span>
           </div>
           <div className={styles.metaItem}>
             <span className={styles.metaLabel}>Precio estimado</span>

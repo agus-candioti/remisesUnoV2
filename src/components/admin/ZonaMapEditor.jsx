@@ -62,7 +62,7 @@ export default function ZonaMapEditor({ zona, onSave, onClose }) {
 
       // If the zone already has a polygon, render it
       if (zona.polygon && zona.polygon.length >= 3) {
-        const latlngs = zona.polygon.map(([lat, lng]) => [lat, lng])
+        const latlngs = zona.polygon.map(p => [p.lat, p.lng])
         const poly = L.polygon(latlngs, { color: '#075E54', fillOpacity: 0.2 })
         drawnLayers.addLayer(poly)
         map.fitBounds(poly.getBounds(), { padding: [32, 32] })
@@ -106,7 +106,7 @@ export default function ZonaMapEditor({ zona, onSave, onClose }) {
     const layers = drawnLayersRef.current.getLayers()
     if (layers.length === 0) return null
     const latlngs = layers[0].getLatLngs()[0]
-    return latlngs.map(ll => [ll.lat, ll.lng])
+    return latlngs.map(ll => ({ lat: ll.lat, lng: ll.lng }))
   }
 
   async function handleSave() {

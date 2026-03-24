@@ -37,8 +37,8 @@ export function pointInPolygon(lat, lng, polygon) {
   if (!polygon || polygon.length < 3) return false
   let inside = false
   for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const [yi, xi] = polygon[i]
-    const [yj, xj] = polygon[j]
+    const { lat: yi, lng: xi } = polygon[i]
+    const { lat: yj, lng: xj } = polygon[j]
     const intersects =
       yi > lng !== yj > lng &&
       lat < ((xj - xi) * (lng - yi)) / (yj - yi) + xi

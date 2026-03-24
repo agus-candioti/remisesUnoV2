@@ -29,8 +29,8 @@ function customerWaLink(s) {
   }
   const msg =
     `Hola ${s.pasajero}, te contactamos desde *UNO Remises* en relación a ${ref}.\n\n` +
-    `📍 *Origen:* ${s.origen}\n` +
-    `🏁 *Destino:* ${s.destino}`
+    `Origen: ${s.origen}\n` +
+    `Destino: ${s.destino}`
   return buildWhatsAppLink(s.telefono.replace(/\D/g, ''), msg)
 }
 

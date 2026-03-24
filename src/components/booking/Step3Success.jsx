@@ -8,6 +8,7 @@ export default function Step3Success({ formData, solicitudId, onReset }) {
     telefono: formData.telefono,
     origen: formData.origen,
     destino: formData.destino,
+    tipo: formData.tipo,
     fecha: formData.fecha,
     hora: formData.hora,
   })

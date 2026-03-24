@@ -238,14 +238,14 @@ export default function SolicitudesPage() {
             {dispatchChoferId && (() => {
               const c = choferes.find(ch => ch.id === dispatchChoferId)
               if (!c) return null
-              const isAhora = dispatchModal.tipo === 'ahora'
               const waLink = notifyDriverLink(c.telefono, {
                 pasajero: dispatchModal.pasajero,
                 telefono: dispatchModal.telefono,
                 origen: dispatchModal.origen,
                 destino: dispatchModal.destino,
-                fecha: isAhora ? 'Ahora' : (dispatchModal.fecha?.toDate ? dispatchModal.fecha.toDate().toLocaleDateString('es-AR') : ''),
-                hora: isAhora ? '' : (dispatchModal.fecha?.toDate ? dispatchModal.fecha.toDate().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : ''),
+                tipo: dispatchModal.tipo,
+                fecha: dispatchModal.fecha?.toDate ? dispatchModal.fecha.toDate().toLocaleDateString('es-AR') : '',
+                hora: dispatchModal.fecha?.toDate ? dispatchModal.fecha.toDate().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : '',
               })
               return (
                 <a href={waLink} target="_blank" rel="noopener noreferrer" className={styles.waLink}>

@@ -16,6 +16,14 @@ export function buildWhatsAppLink(phone, message) {
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
 }
 
+// Returns the "when" line for a solicitud, handling ahora vs scheduled.
+function whenLine(solicitud) {
+  if (solicitud.tipo === 'ahora') return 'Cuando: Ahora mismo'
+  const fecha = solicitud.fecha ?? ''
+  const hora  = solicitud.hora  ?? ''
+  return hora ? `Fecha: ${fecha}\nHora: ${hora}` : `Fecha: ${fecha}`
+}
+
 /**
  * Generate a link to notify the admin about a new solicitud.
  * @param {Object} solicitud
@@ -23,19 +31,19 @@ export function buildWhatsAppLink(phone, message) {
  * @param {string} solicitud.telefono
  * @param {string} solicitud.origen
  * @param {string} solicitud.destino
- * @param {string} solicitud.fecha - formatted date string
- * @param {string} solicitud.hora - formatted time string
+ * @param {string} solicitud.tipo - 'ahora' | 'reserva'
+ * @param {string} [solicitud.fecha] - formatted date string (reserva only)
+ * @param {string} [solicitud.hora]  - formatted time string (reserva only)
  * @returns {string} WhatsApp URL
  */
 export function notifyAdminLink(solicitud) {
   const msg =
-    `🚗 *Nueva reserva UNO Remises*\n\n` +
-    `👤 Pasajero: ${solicitud.pasajero}\n` +
-    `📱 Tel: ${solicitud.telefono}\n` +
-    `📍 Origen: ${solicitud.origen}\n` +
-    `🏁 Destino: ${solicitud.destino}\n` +
-    `📅 Fecha: ${solicitud.fecha}\n` +
-    `🕐 Hora: ${solicitud.hora}`
+    `*Nueva solicitud - UNO Remises*\n\n` +
+    `Pasajero: ${solicitud.pasajero}\n` +
+    `Tel: ${solicitud.telefono}\n` +
+    `Origen: ${solicitud.origen}\n` +
+    `Destino: ${solicitud.destino}\n` +
+    whenLine(solicitud)
   return buildWhatsAppLink(ADMIN_NUMBER, msg)
 }
 
@@ -43,16 +51,18 @@ export function notifyAdminLink(solicitud) {
  * Generate a link to notify a driver about their assignment.
  * @param {string} driverPhone
  * @param {Object} solicitud
+ * @param {string} solicitud.tipo - 'ahora' | 'reserva'
+ * @param {string} [solicitud.fecha]
+ * @param {string} [solicitud.hora]
  * @returns {string} WhatsApp URL
  */
 export function notifyDriverLink(driverPhone, solicitud) {
   const msg =
-    `🚗 *UNO Remises — Viaje asignado*\n\n` +
-    `👤 Pasajero: ${solicitud.pasajero}\n` +
-    `📱 Tel: ${solicitud.telefono}\n` +
-    `📍 Origen: ${solicitud.origen}\n` +
-    `🏁 Destino: ${solicitud.destino}\n` +
-    `📅 Fecha: ${solicitud.fecha}\n` +
-    `🕐 Hora: ${solicitud.hora}`
+    `*UNO Remises - Viaje asignado*\n\n` +
+    `Pasajero: ${solicitud.pasajero}\n` +
+    `Tel: ${solicitud.telefono}\n` +
+    `Origen: ${solicitud.origen}\n` +
+    `Destino: ${solicitud.destino}\n` +
+    whenLine(solicitud)
   return buildWhatsAppLink(driverPhone, msg)
 }

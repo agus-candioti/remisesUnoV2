@@ -21,6 +21,7 @@ const INITIAL_FORM = {
   destinoLng: null,
   fecha: '',
   hora: '',
+  tipo: null,
 }
 
 export default function BookingPage() {
@@ -75,6 +76,7 @@ export default function BookingPage() {
           ? { lat: formData.destinoLat, lng: formData.destinoLng }
           : null,
         fecha: Timestamp.fromDate(fechaHora),
+        tipo: formData.tipo,
         estado: 'pending',
         zonaId: null,
         precioEstimado: estimatedPrice,

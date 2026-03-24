@@ -2,7 +2,8 @@ import Button from '../common/Button.jsx'
 import { formatPrice } from '../../services/priceCalculator.js'
 import styles from './Steps.module.css'
 
-function formatDate(fecha, hora) {
+function formatDate(tipo, fecha, hora) {
+  if (tipo === 'ahora') return 'Ahora mismo'
   if (!fecha) return ''
   const [year, month, day] = fecha.split('-')
   return `${day}/${month}/${year} a las ${hora}`
@@ -34,7 +35,7 @@ export default function Step2Confirm({ formData, estimatedPrice, onBack, onConfi
         </div>
         <div className={styles.summaryRow}>
           <dt>Fecha y hora</dt>
-          <dd>{formatDate(formData.fecha, formData.hora)}</dd>
+          <dd>{formatDate(formData.tipo, formData.fecha, formData.hora)}</dd>
         </div>
         <div className={`${styles.summaryRow} ${styles.priceRow}`}>
           <dt>Precio estimado</dt>

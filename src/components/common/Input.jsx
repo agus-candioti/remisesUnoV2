@@ -4,6 +4,7 @@ export default function Input({
   label,
   error,
   hint,
+  as: Tag = 'input',
   className = '',
   ...props
 }) {
@@ -14,7 +15,7 @@ export default function Input({
           {label}
         </label>
       )}
-      <input
+      <Tag
         className={`${styles.input} ${error ? styles.inputError : ''}`}
         {...props}
       />

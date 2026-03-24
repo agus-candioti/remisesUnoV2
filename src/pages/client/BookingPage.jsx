@@ -22,6 +22,7 @@ const INITIAL_FORM = {
   fecha: '',
   hora: '',
   tipo: null,
+  notas: '',
 }
 
 export default function BookingPage() {
@@ -82,7 +83,7 @@ export default function BookingPage() {
         precioEstimado: estimatedPrice,
         choferAsignado: null,
         choferNombre: null,
-        notas: '',
+        notas: formData.notas.trim(),
       })
       setSolicitudId(id)
       setStep(3)

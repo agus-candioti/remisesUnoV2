@@ -37,6 +37,12 @@ export default function Step2Confirm({ formData, estimatedPrice, onBack, onConfi
           <dt>Fecha y hora</dt>
           <dd>{formatDate(formData.tipo, formData.fecha, formData.hora)}</dd>
         </div>
+        {formData.notas?.trim() && (
+          <div className={styles.summaryRow}>
+            <dt>Observaciones</dt>
+            <dd>{formData.notas.trim()}</dd>
+          </div>
+        )}
         <div className={`${styles.summaryRow} ${styles.priceRow}`}>
           <dt>Precio estimado</dt>
           <dd className={styles.priceValue}>{formatPrice(estimatedPrice)}</dd>

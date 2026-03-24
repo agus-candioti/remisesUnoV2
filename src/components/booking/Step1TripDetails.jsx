@@ -4,12 +4,26 @@ import Button from '../common/Button.jsx'
 import AddressInput from './AddressInput.jsx'
 import styles from './Steps.module.css'
 
+// Strip country code, leading 0, and mobile indicator to get bare 10-digit AR number
+function normalizePhone(raw) {
+  let d = raw.replace(/\D/g, '')
+  if (d.startsWith('54')) d = d.slice(2)
+  if (d.length === 11 && d.startsWith('9')) d = d.slice(1)
+  if (d.startsWith('0')) d = d.slice(1)
+  return d
+}
+
 function validate(data, bookingType) {
   const errors = {}
   if (!data.pasajero.trim()) errors.pasajero = 'Requerido'
-  if (!data.telefono.trim()) errors.telefono = 'Requerido'
-  else if (!/^\+?[\d\s\-()]{6,20}$/.test(data.telefono.trim()))
-    errors.telefono = 'Teléfono inválido'
+  if (!data.telefono.trim()) {
+    errors.telefono = 'Requerido'
+  } else {
+    const normalized = normalizePhone(data.telefono)
+    if (normalized.length !== 10) {
+      errors.telefono = 'Ingresá área + número sin el 0 ni el 15 (ej: 1125941741)'
+    }
+  }
   if (!data.origen.trim()) errors.origen = 'Requerido'
   if (!data.destino.trim()) errors.destino = 'Requerido'
   if (!bookingType) errors.bookingType = 'Elegí una opción'
@@ -32,6 +46,8 @@ export default function Step1TripDetails({ formData, onChange, onSelectOrigen, o
       return
     }
     setErrors({})
+    // Store normalized phone so WhatsApp links work out of the box
+    onChange('telefono', normalizePhone(formData.telefono))
     if (bookingType === 'ahora') {
       const now = new Date()
       onChange('fecha', now.toISOString().split('T')[0])
@@ -87,6 +103,16 @@ export default function Step1TripDetails({ formData, onChange, onSelectOrigen, o
         onChange={val => onChange('destino', val)}
         onSelect={onSelectDestino}
         error={errors.destino}
+      />
+
+      <Input
+        as="textarea"
+        id="notas"
+        label="Observaciones (opcional)"
+        placeholder="Ej: viajo con mascota, necesito lugar en el baúl, silla de bebé, voy con mucho equipaje…"
+        rows={3}
+        value={formData.notas}
+        onChange={e => onChange('notas', e.target.value)}
       />
 
       {/* Booking type */}

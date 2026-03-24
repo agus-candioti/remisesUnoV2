@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Timestamp } from 'firebase/firestore'
 import { SolicitudesRepository } from '../../repositories/index.js'
+import { useZonas } from '../../hooks/useZonas.js'
+import { calculateTripPrice } from '../../services/priceCalculator.js'
 import StepIndicator from '../../components/booking/StepIndicator.jsx'
 import Step1TripDetails from '../../components/booking/Step1TripDetails.jsx'
 import Step2Confirm from '../../components/booking/Step2Confirm.jsx'
@@ -12,7 +14,11 @@ const INITIAL_FORM = {
   pasajero: '',
   telefono: '',
   origen: '',
+  origenLat: null,
+  origenLng: null,
   destino: '',
+  destinoLat: null,
+  destinoLng: null,
   fecha: '',
   hora: '',
 }
@@ -20,12 +26,36 @@ const INITIAL_FORM = {
 export default function BookingPage() {
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState(INITIAL_FORM)
+  const [estimatedPrice, setEstimatedPrice] = useState(null)
   const [solicitudId, setSolicitudId] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const { zonas } = useZonas()
 
   function handleChange(key, value) {
     setFormData(prev => ({ ...prev, [key]: value }))
+  }
+
+  function handleSelectOrigen(suggestion) {
+    setFormData(prev => ({
+      ...prev,
+      origenLat: suggestion?.lat ?? null,
+      origenLng: suggestion?.lng ?? null,
+    }))
+  }
+
+  function handleSelectDestino(suggestion) {
+    setFormData(prev => ({
+      ...prev,
+      destinoLat: suggestion?.lat ?? null,
+      destinoLng: suggestion?.lng ?? null,
+    }))
+  }
+
+  function handleNext() {
+    const price = calculateTripPrice(formData.destinoLat, formData.destinoLng, zonas)
+    setEstimatedPrice(price)
+    setStep(2)
   }
 
   async function handleConfirm() {
@@ -38,10 +68,16 @@ export default function BookingPage() {
         telefono: formData.telefono.trim(),
         origen: formData.origen.trim(),
         destino: formData.destino.trim(),
+        coordOrigen: formData.origenLat != null
+          ? { lat: formData.origenLat, lng: formData.origenLng }
+          : null,
+        coordDestino: formData.destinoLat != null
+          ? { lat: formData.destinoLat, lng: formData.destinoLng }
+          : null,
         fecha: Timestamp.fromDate(fechaHora),
         estado: 'pending',
         zonaId: null,
-        precioEstimado: null,
+        precioEstimado: estimatedPrice,
         choferAsignado: null,
         choferNombre: null,
         notas: '',
@@ -59,6 +95,7 @@ export default function BookingPage() {
     setStep(1)
     setFormData(INITIAL_FORM)
     setSolicitudId(null)
+    setEstimatedPrice(null)
     setError(null)
   }
 
@@ -97,12 +134,15 @@ export default function BookingPage() {
             <Step1TripDetails
               formData={formData}
               onChange={handleChange}
-              onNext={() => setStep(2)}
+              onSelectOrigen={handleSelectOrigen}
+              onSelectDestino={handleSelectDestino}
+              onNext={handleNext}
             />
           )}
           {step === 2 && (
             <Step2Confirm
               formData={formData}
+              estimatedPrice={estimatedPrice}
               onBack={() => setStep(1)}
               onConfirm={handleConfirm}
               loading={loading}

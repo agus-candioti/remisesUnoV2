@@ -1,0 +1,53 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.hint {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  background: var(--color-brand-faint);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  line-height: 1.6;
+}
+
+.loading {
+  height: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  background: var(--color-surface-hover);
+  border-radius: var(--radius-md);
+}
+
+.map {
+  height: 440px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1.5px solid var(--color-border);
+  z-index: 0;
+}
+
+/* Ensure Leaflet controls render above the modal overlay */
+:global(.leaflet-top),
+:global(.leaflet-bottom) {
+  z-index: 1;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.right {
+  display: flex;
+  gap: var(--space-3);
+  margin-left: auto;
+}

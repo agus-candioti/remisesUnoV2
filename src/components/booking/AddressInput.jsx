@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { searchAddress } from '../../services/addressAutocomplete.js'
 import styles from './AddressInput.module.css'
 
-export default function AddressInput({ label, value, onChange, error, id, placeholder }) {
+export default function AddressInput({ label, value, onChange, onSelect, error, id, placeholder }) {
   const [suggestions, setSuggestions] = useState([])
   const [open, setOpen] = useState(false)
   const debounceRef = useRef(null)
@@ -21,16 +21,19 @@ export default function AddressInput({ label, value, onChange, error, id, placeh
   function handleChange(e) {
     const val = e.target.value
     onChange(val)
+    // Clear coords when user types manually (no suggestion selected)
+    onSelect?.(null)
     clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(async () => {
       const results = await searchAddress(val)
       setSuggestions(results)
       setOpen(results.length > 0)
-    }, 200)
+    }, 350)
   }
 
   function handleSelect(suggestion) {
     onChange(suggestion.value)
+    onSelect?.(suggestion)
     setOpen(false)
     setSuggestions([])
   }

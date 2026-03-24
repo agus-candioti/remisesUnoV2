@@ -4,14 +4,17 @@ import Button from '../../components/common/Button.jsx'
 import Modal from '../../components/common/Modal.jsx'
 import Input from '../../components/common/Input.jsx'
 import LoadingSpinner from '../../components/common/LoadingSpinner.jsx'
+import ZonaMapEditor from '../../components/admin/ZonaMapEditor.jsx'
 import { formatPrice } from '../../services/priceCalculator.js'
 import styles from './CrudPage.module.css'
+import zonaStyles from './ZonasPage.module.css'
 
 const EMPTY_FORM = { nombre: '', descripcion: '', precio: '', activa: true }
 
 export default function ZonasPage() {
   const { zonas, loading, createZona, updateZona, deleteZona } = useZonas()
   const [modal, setModal] = useState(null)
+  const [mapZona, setMapZona] = useState(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState({})
@@ -57,6 +60,11 @@ export default function ZonasPage() {
     await deleteZona(id)
   }
 
+  async function handleMapSave(polygon) {
+    await updateZona(mapZona.id, { ...mapZona, polygon })
+    setMapZona(null)
+  }
+
   if (loading) return <div className={styles.centered}><LoadingSpinner size="lg" /></div>
 
   return (
@@ -67,7 +75,7 @@ export default function ZonasPage() {
       </div>
 
       <p className={styles.hint}>
-        Las zonas con sus precios son visibles solo para administradores.
+        Las zonas con sus precios son visibles solo para administradores. Dibujá el polígono de cada zona para calcular precios automáticamente.
       </p>
 
       {zonas.length === 0 ? (
@@ -80,6 +88,7 @@ export default function ZonasPage() {
                 <th>Nombre</th>
                 <th>Descripción</th>
                 <th>Precio</th>
+                <th>Mapa</th>
                 <th>Estado</th>
                 <th>Acciones</th>
               </tr>
@@ -90,6 +99,15 @@ export default function ZonasPage() {
                   <td className={styles.bold}>{z.nombre}</td>
                   <td>{z.descripcion || '—'}</td>
                   <td className={styles.price}>{formatPrice(z.precio)}</td>
+                  <td>
+                    <button
+                      className={`${zonaStyles.mapBtn} ${z.polygon ? zonaStyles.mapBtnActive : ''}`}
+                      onClick={() => setMapZona(z)}
+                      title={z.polygon ? 'Zona dibujada — click para editar' : 'Sin polígono — click para dibujar'}
+                    >
+                      {z.polygon ? '📍 Editár' : '🗺 Dibujar'}
+                    </button>
+                  </td>
                   <td>
                     <span className={z.activa ? styles.badgeActive : styles.badgeInactive}>
                       {z.activa ? 'Activa' : 'Inactiva'}
@@ -128,6 +146,14 @@ export default function ZonasPage() {
             </div>
           </div>
         </Modal>
+      )}
+
+      {mapZona && (
+        <ZonaMapEditor
+          zona={mapZona}
+          onSave={handleMapSave}
+          onClose={() => setMapZona(null)}
+        />
       )}
     </div>
   )

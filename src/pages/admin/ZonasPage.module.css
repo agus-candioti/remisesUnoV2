@@ -1,0 +1,30 @@
+.mapBtn {
+  background: var(--color-surface-hover);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.mapBtn:hover {
+  border-color: var(--color-brand);
+  color: var(--color-brand);
+  background: var(--color-brand-faint);
+}
+
+.mapBtnActive {
+  border-color: var(--color-finished);
+  color: var(--color-finished);
+  background: var(--color-finished-bg);
+}
+
+.mapBtnActive:hover {
+  border-color: var(--color-brand);
+  color: var(--color-brand);
+  background: var(--color-brand-faint);
+}

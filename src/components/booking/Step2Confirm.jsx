@@ -1,5 +1,5 @@
-import { useState } from 'react'
 import Button from '../common/Button.jsx'
+import { formatPrice } from '../../services/priceCalculator.js'
 import styles from './Steps.module.css'
 
 function formatDate(fecha, hora) {
@@ -8,7 +8,7 @@ function formatDate(fecha, hora) {
   return `${day}/${month}/${year} a las ${hora}`
 }
 
-export default function Step2Confirm({ formData, onBack, onConfirm, loading }) {
+export default function Step2Confirm({ formData, estimatedPrice, onBack, onConfirm, loading }) {
   return (
     <div className={styles.confirm}>
       <p className={styles.confirmHint}>
@@ -38,7 +38,7 @@ export default function Step2Confirm({ formData, onBack, onConfirm, loading }) {
         </div>
         <div className={`${styles.summaryRow} ${styles.priceRow}`}>
           <dt>Precio estimado</dt>
-          <dd className={styles.priceValue}>A confirmar</dd>
+          <dd className={styles.priceValue}>{formatPrice(estimatedPrice)}</dd>
         </div>
       </dl>
 

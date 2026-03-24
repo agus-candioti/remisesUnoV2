@@ -5,6 +5,7 @@
  * @property {string} descripcion
  * @property {number} precio
  * @property {boolean} activa
+ * @property {Array<[number, number]>|null} polygon  — GeoJSON-style [[lat,lng],...] polygon or null if not yet drawn
  */
 
 /**

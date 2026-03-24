@@ -17,7 +17,7 @@ function validate(data) {
   return errors
 }
 
-export default function Step1TripDetails({ formData, onChange, onNext }) {
+export default function Step1TripDetails({ formData, onChange, onSelectOrigen, onSelectDestino, onNext }) {
   const [errors, setErrors] = useState({})
 
   function handleSubmit(e) {
@@ -66,6 +66,7 @@ export default function Step1TripDetails({ formData, onChange, onNext }) {
         placeholder="¿Desde dónde salís?"
         value={formData.origen}
         onChange={val => onChange('origen', val)}
+        onSelect={onSelectOrigen}
         error={errors.origen}
       />
 
@@ -75,6 +76,7 @@ export default function Step1TripDetails({ formData, onChange, onNext }) {
         placeholder="¿A dónde vas?"
         value={formData.destino}
         onChange={val => onChange('destino', val)}
+        onSelect={onSelectDestino}
         error={errors.destino}
       />
 

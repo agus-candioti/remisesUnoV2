@@ -8,10 +8,10 @@ export function useSolicitudes() {
 
   useEffect(() => {
     setLoading(true)
-    const unsub = SolicitudesRepository.subscribeToAll(data => {
-      setSolicitudes(data)
-      setLoading(false)
-    })
+    const unsub = SolicitudesRepository.subscribeToAll(
+      data => { setSolicitudes(data); setLoading(false) },
+      err  => { setError(err.message); setLoading(false) }
+    )
     return unsub
   }, [])
 

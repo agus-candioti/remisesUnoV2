@@ -73,10 +73,10 @@ export const SolicitudesRepository = {
     return snap.docs.map(d => ({ id: d.id, ...d.data() }))
   },
 
-  subscribeToAll(callback) {
+  subscribeToAll(callback, onError) {
     const q = query(collection(db, COL), orderBy('fecha', 'desc'))
     return onSnapshot(q, snap => {
       callback(snap.docs.map(d => ({ id: d.id, ...d.data() })))
-    })
+    }, onError)
   },
 }

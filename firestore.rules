@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Anonymous clients can only create solicitudes (no auth required)
+    // Admins can read, update, and delete
+    match /solicitudes/{id} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+
+    // All other collections: authenticated admins only
+    match /zonas/{id} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /choferes/{id} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /bloqueadas/{id} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

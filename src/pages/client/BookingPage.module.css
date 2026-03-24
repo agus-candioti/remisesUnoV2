@@ -1,0 +1,111 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.logoMark {
+  width: 36px;
+  height: 36px;
+  background: var(--color-brand);
+  color: #fff;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.logoText {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--color-text);
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--space-10) var(--space-4);
+}
+
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-8);
+  width: 100%;
+  max-width: 560px;
+}
+
+@media (max-width: 600px) {
+  .card {
+    border-radius: var(--radius-lg);
+    padding: var(--space-6) var(--space-5);
+  }
+}
+
+.cardHeader {
+  margin-bottom: var(--space-6);
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin-bottom: var(--space-1);
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+}
+
+.errorBanner {
+  background: var(--color-cancelled-bg);
+  color: var(--color-cancelled);
+  border: 1px solid var(--color-cancelled);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.875rem;
+  margin-bottom: var(--space-4);
+}
+
+.footer {
+  text-align: center;
+  padding: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+
+.adminLink {
+  font-size: 0.8125rem;
+  color: var(--color-text-faint);
+  text-decoration: none;
+}
+.adminLink:hover {
+  color: var(--color-text-muted);
+  text-decoration: underline;
+}

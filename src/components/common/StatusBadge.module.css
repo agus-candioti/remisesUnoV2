@@ -1,0 +1,15 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.pending   { background: var(--color-pending-bg);    color: var(--color-pending);    }
+.approved  { background: var(--color-approved-bg);   color: var(--color-approved);   }
+.dispatched{ background: var(--color-dispatched-bg); color: var(--color-dispatched); }
+.finished  { background: var(--color-finished-bg);   color: var(--color-finished);   }
+.cancelled { background: var(--color-cancelled-bg);  color: var(--color-cancelled);  }

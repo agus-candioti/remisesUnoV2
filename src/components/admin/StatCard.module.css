@@ -1,0 +1,35 @@
+.card {
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.icon { font-size: 1.5rem; }
+
+.value {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.label {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+/* Accent variants */
+.pending  { border-color: var(--color-pending);    }
+.approved { border-color: var(--color-approved);   }
+.dispatched { border-color: var(--color-dispatched); }
+.finished { border-color: var(--color-finished);   }

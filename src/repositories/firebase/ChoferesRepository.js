@@ -6,6 +6,7 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  increment,
   orderBy,
   query,
 } from 'firebase/firestore'
@@ -26,7 +27,7 @@ export const ChoferesRepository = {
   },
 
   async create(data) {
-    const ref = await addDoc(collection(db, COL), data)
+    const ref = await addDoc(collection(db, COL), { balance: 0, ...data })
     return ref.id
   },
 
@@ -36,5 +37,9 @@ export const ChoferesRepository = {
 
   async delete(id) {
     await deleteDoc(doc(db, COL, id))
+  },
+
+  async incrementBalance(id, amount) {
+    await updateDoc(doc(db, COL, id), { balance: increment(amount) })
   },
 }

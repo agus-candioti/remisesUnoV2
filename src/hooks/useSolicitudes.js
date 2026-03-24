@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { SolicitudesRepository } from '../repositories/index.js'
+import { SolicitudesRepository, ChoferesRepository, ViajesRepository } from '../repositories/index.js'
 
 export function useSolicitudes() {
   const [solicitudes, setSolicitudes] = useState([])
@@ -19,6 +19,31 @@ export function useSolicitudes() {
     await SolicitudesRepository.updateEstado(id, estado)
   }
 
+  /**
+   * Mark a trip as finished, credit the driver's balance, and log the daily record.
+   * Only credits if a driver and price are set; safe to call without them.
+   */
+  async function finalizarViaje(solicitud) {
+    await SolicitudesRepository.updateEstado(solicitud.id, 'finished')
+    if (solicitud.choferAsignado && solicitud.precioEstimado) {
+      const dia = new Date().toISOString().split('T')[0]
+      await Promise.all([
+        ChoferesRepository.incrementBalance(solicitud.choferAsignado, solicitud.precioEstimado),
+        ViajesRepository.create({
+          choferId: solicitud.choferAsignado,
+          choferNombre: solicitud.choferNombre ?? '',
+          solicitudId: solicitud.id,
+          pasajero: solicitud.pasajero,
+          origen: solicitud.origen,
+          destino: solicitud.destino,
+          fechaViaje: solicitud.fecha ?? null,
+          monto: solicitud.precioEstimado,
+          dia,
+        }),
+      ])
+    }
+  }
+
   async function assignDriver(id, choferId, choferNombre) {
     await SolicitudesRepository.update(id, {
       choferAsignado: choferId,
@@ -35,5 +60,5 @@ export function useSolicitudes() {
     await SolicitudesRepository.update(id, { notas })
   }
 
-  return { solicitudes, loading, error, updateEstado, assignDriver, assignZona, updateNotas }
+  return { solicitudes, loading, error, updateEstado, finalizarViaje, assignDriver, assignZona, updateNotas }
 }

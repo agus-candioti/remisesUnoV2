@@ -22,5 +22,9 @@ service cloud.firestore {
     match /bloqueadas/{id} {
       allow read, write: if request.auth != null;
     }
+
+    match /registroViajes/{id} {
+      allow read, write: if request.auth != null;
+    }
   }
 }

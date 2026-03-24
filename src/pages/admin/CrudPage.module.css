@@ -139,3 +139,51 @@
   gap: var(--space-3);
   margin-top: var(--space-2);
 }
+
+/* Daily record modal */
+.registroHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.registroSaldo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.registroSaldoLabel {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.registroSaldoValue {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-brand);
+}
+
+.registroDiaPicker {
+  flex-shrink: 0;
+  width: auto;
+}
+
+.routeCell {
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table tfoot td {
+  padding: var(--space-3) var(--space-4);
+  border-top: 2px solid var(--color-border);
+  font-size: 0.875rem;
+  background: var(--color-surface-hover);
+}

@@ -43,7 +43,7 @@ function customerWaLink(s) {
  *   onOpenDispatch: function(solicitud),
  * }} props
  */
-export default function SolicitudDetailModal({ solicitud: s, choferes, onClose, onEstado, onOpenDispatch }) {
+export default function SolicitudDetailModal({ solicitud: s, choferes, onClose, onEstado, onOpenDispatch, onFinalizarViaje }) {
   const chofer = choferes?.find(c => c.id === s.choferAsignado)
   const shortId = s.id.slice(-6).toUpperCase()
 
@@ -139,8 +139,8 @@ export default function SolicitudDetailModal({ solicitud: s, choferes, onClose, 
               </Button>
             )}
             {s.estado === 'dispatched' && (
-              <Button variant="secondary" onClick={() => onEstado(s.id, 'finished')}>
-                🏁 Finalizar viaje
+              <Button variant="secondary" onClick={() => onFinalizarViaje(s)}>
+                Finalizar viaje
               </Button>
             )}
             <Button variant="danger" onClick={() => { onEstado(s.id, 'cancelled'); onClose() }}>

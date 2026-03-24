@@ -186,3 +186,17 @@
   color: #25D366;
   text-align: center;
 }
+
+.conflictWarning {
+  background: #fffbeb;
+  border: 1.5px solid #f59e0b;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.875rem;
+  color: #92400e;
+}
+[data-theme="dark"] .conflictWarning {
+  background: #2d1f00;
+  border-color: #b45309;
+  color: #fcd34d;
+}

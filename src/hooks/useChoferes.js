@@ -35,5 +35,5 @@ export function useChoferes() {
     await load()
   }
 
-  return { choferes, loading, error, createChofer, updateChofer, deleteChofer }
+  return { choferes, loading, error, load, createChofer, updateChofer, deleteChofer }
 }

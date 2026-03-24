@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useSolicitudesCtx } from '../../context/SolicitudesContext.jsx'
 import { useChoferes } from '../../hooks/useChoferes.js'
 import { useZonas } from '../../hooks/useZonas.js'
@@ -35,7 +35,7 @@ function formatTs(ts, tipo) {
 }
 
 export default function SolicitudesPage() {
-  const { solicitudes, loading, updateEstado, assignDriver, assignZona } = useSolicitudesCtx()
+  const { solicitudes, loading, updateEstado, finalizarViaje, assignDriver, assignZona } = useSolicitudesCtx()
   const { choferes } = useChoferes()
   const { zonas } = useZonas()
 
@@ -55,6 +55,18 @@ export default function SolicitudesPage() {
 
   const [actionLoading, setActionLoading] = useState(false)
 
+  // Map of choferId → active trips (approved/dispatched) for conflict detection
+  const activeByChofer = useMemo(() => {
+    const map = {}
+    solicitudes.forEach(s => {
+      if (['approved', 'dispatched'].includes(s.estado) && s.choferAsignado) {
+        if (!map[s.choferAsignado]) map[s.choferAsignado] = []
+        map[s.choferAsignado].push(s)
+      }
+    })
+    return map
+  }, [solicitudes])
+
   const filtered = solicitudes.filter(s => {
     if (filterEstado !== 'todos' && s.estado !== filterEstado) return false
     if (filterFecha) {
@@ -67,6 +79,12 @@ export default function SolicitudesPage() {
   async function handleEstado(id, newEstado) {
     setActionLoading(true)
     try { await updateEstado(id, newEstado) }
+    finally { setActionLoading(false) }
+  }
+
+  async function handleFinalizarViaje(s) {
+    setActionLoading(true)
+    try { await finalizarViaje(s) }
     finally { setActionLoading(false) }
   }
 
@@ -185,7 +203,7 @@ export default function SolicitudesPage() {
                         </Button>
                       )}
                       {s.estado === 'dispatched' && (
-                        <Button size="sm" variant="secondary" onClick={() => handleEstado(s.id, 'finished')}>
+                        <Button size="sm" variant="secondary" onClick={() => handleFinalizarViaje(s)}>
                           Finalizar
                         </Button>
                       )}
@@ -211,6 +229,7 @@ export default function SolicitudesPage() {
           onClose={() => setSelected(null)}
           onEstado={(id, estado) => { handleEstado(id, estado); setSelected(null) }}
           onOpenDispatch={s => { setSelected(null); openDispatch(s) }}
+          onFinalizarViaje={s => { handleFinalizarViaje(s); setSelected(null) }}
         />
       )}
 
@@ -231,6 +250,15 @@ export default function SolicitudesPage() {
                 <option key={c.id} value={c.id}>{c.nombre} — {c.vehiculo} ({c.patente})</option>
               ))}
             </Select>
+            {dispatchChoferId && activeByChofer[dispatchChoferId] && (
+              <div className={styles.conflictWarning}>
+                <strong>Atención:</strong> Este chofer ya tiene{' '}
+                {activeByChofer[dispatchChoferId].length === 1
+                  ? 'un viaje activo'
+                  : `${activeByChofer[dispatchChoferId].length} viajes activos`}.
+                {' '}Podés asignarlo igualmente si las rutas son compatibles.
+              </div>
+            )}
             <div className={styles.modalActions}>
               <Button variant="secondary" onClick={() => setDispatchModal(null)}>Cancelar</Button>
               <Button onClick={handleDispatch} loading={actionLoading}>Confirmar</Button>

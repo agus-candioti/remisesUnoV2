@@ -47,7 +47,7 @@ export default function ZonaMapEditor({ zona, onSave, onClose }) {
       // Prevent double-init if React re-renders
       if (containerRef.current._leaflet_id) return
 
-      const map = L.map(containerRef.current).setView([-34.617, -58.443], 12)
+      const map = L.map(containerRef.current).setView([-34.167, -58.957], 14)
       mapRef.current = map
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

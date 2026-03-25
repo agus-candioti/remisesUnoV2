@@ -56,7 +56,8 @@ export async function searchNominatim(query) {
       countrycodes: 'ar',
       addressdetails: '1',
       viewbox: VIEWBOX,
-      bounded: '1',
+      // No bounded=1: viewbox biases results toward Campana/BA area but
+      // still returns results if the exact address isn't in OSM locally.
     })
     const res = await fetch(
       `https://nominatim.openstreetmap.org/search?${params}`,

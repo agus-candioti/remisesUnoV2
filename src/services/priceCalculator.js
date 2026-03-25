@@ -40,8 +40,8 @@ export function pointInPolygon(lat, lng, polygon) {
     const { lat: yi, lng: xi } = polygon[i]
     const { lat: yj, lng: xj } = polygon[j]
     const intersects =
-      yi > lng !== yj > lng &&
-      lat < ((xj - xi) * (lng - yi)) / (yj - yi) + xi
+      (yi > lat) !== (yj > lat) &&
+      lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi
     if (intersects) inside = !inside
   }
   return inside

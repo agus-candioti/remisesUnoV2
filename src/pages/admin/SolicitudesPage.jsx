@@ -8,6 +8,7 @@ import Modal from '../../components/common/Modal.jsx'
 import Select from '../../components/common/Select.jsx'
 import LoadingSpinner from '../../components/common/LoadingSpinner.jsx'
 import SolicitudDetailModal from '../../components/admin/SolicitudDetailModal.jsx'
+import NuevaSolicitudModal from '../../components/admin/NuevaSolicitudModal.jsx'
 import { notifyDriverLink } from '../../services/whatsapp.js'
 import { formatPrice } from '../../services/priceCalculator.js'
 import styles from './SolicitudesPage.module.css'
@@ -35,12 +36,15 @@ function formatTs(ts, tipo) {
 }
 
 export default function SolicitudesPage() {
-  const { solicitudes, loading, updateEstado, finalizarViaje, assignDriver, assignZona } = useSolicitudesCtx()
+  const { solicitudes, loading, updateEstado, finalizarViaje, assignDriver, assignZona, createSolicitud } = useSolicitudesCtx()
   const { choferes } = useChoferes()
   const { zonas } = useZonas()
 
   const [filterEstado, setFilterEstado] = useState('todos')
   const [filterFecha, setFilterFecha] = useState('')
+
+  // Nueva solicitud modal
+  const [nuevaModal, setNuevaModal] = useState(false)
 
   // Detail modal
   const [selected, setSelected] = useState(null)
@@ -132,8 +136,11 @@ export default function SolicitudesPage() {
   return (
     <div className={styles.page}>
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>Solicitudes</h1>
-        <span className={styles.count}>{filtered.length} resultado{filtered.length !== 1 ? 's' : ''}</span>
+        <div className={styles.pageHeaderLeft}>
+          <h1 className={styles.pageTitle}>Solicitudes</h1>
+          <span className={styles.count}>{filtered.length} resultado{filtered.length !== 1 ? 's' : ''}</span>
+        </div>
+        <Button onClick={() => setNuevaModal(true)}>Nueva Solicitud</Button>
       </div>
 
       {/* Filters */}
@@ -289,6 +296,15 @@ export default function SolicitudesPage() {
             })()}
           </div>
         </Modal>
+      )}
+
+      {/* Nueva solicitud modal */}
+      {nuevaModal && (
+        <NuevaSolicitudModal
+          zonas={zonas}
+          onClose={() => setNuevaModal(false)}
+          onCreate={createSolicitud}
+        />
       )}
 
       {/* Zone assignment modal */}

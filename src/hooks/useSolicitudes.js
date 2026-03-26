@@ -60,5 +60,9 @@ export function useSolicitudes() {
     await SolicitudesRepository.update(id, { notas })
   }
 
-  return { solicitudes, loading, error, updateEstado, finalizarViaje, assignDriver, assignZona, updateNotas }
+  async function createSolicitud(data) {
+    await SolicitudesRepository.create(data)
+  }
+
+  return { solicitudes, loading, error, updateEstado, finalizarViaje, assignDriver, assignZona, updateNotas, createSolicitud }
 }

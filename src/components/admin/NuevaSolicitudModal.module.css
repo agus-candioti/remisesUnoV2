@@ -1,0 +1,67 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+@media (max-width: 480px) {
+  .grid2 { grid-template-columns: 1fr; }
+}
+
+/* Booking type selector */
+.tipoGroup {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.tipoBtn {
+  flex: 1;
+  padding: var(--space-3) var(--space-4);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  text-align: center;
+  color: var(--color-text);
+}
+
+.tipoBtn:hover {
+  background: var(--color-surface-hover);
+}
+
+.tipoBtnActive {
+  border-color: var(--color-brand);
+  background: var(--color-brand-faint);
+  color: var(--color-brand);
+}
+
+/* Section label above tipo selector */
+.tipoLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-bottom: calc(-1 * var(--space-2));
+}
+
+/* Price hint */
+.priceHint {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  margin-top: calc(-1 * var(--space-2));
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}

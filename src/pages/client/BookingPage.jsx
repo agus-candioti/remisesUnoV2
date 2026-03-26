@@ -55,7 +55,7 @@ export default function BookingPage() {
   }
 
   function handleNext() {
-    const price = calculateTripPrice(formData.destinoLat, formData.destinoLng, zonas)
+    const price = calculateTripPrice(formData.destinoLat, formData.destinoLng, zonas, formData.origenLat, formData.origenLng)
     setEstimatedPrice(price)
     setStep(2)
   }

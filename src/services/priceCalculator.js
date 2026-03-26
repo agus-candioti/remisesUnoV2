@@ -60,13 +60,19 @@ export function findZoneForCoords(lat, lng, zonas) {
 }
 
 /**
- * Calculate the trip price based on the destination coordinates and available zones.
+ * Calculate the trip price from origin and destination coordinates.
+ * If both endpoints fall in zones, returns the higher price.
+ * origenLat/origenLng are optional for backwards compatibility.
  * @param {number|null} destinoLat
  * @param {number|null} destinoLng
  * @param {import('../repositories/interfaces/IZonasRepository').Zona[]} zonas
+ * @param {number|null} [origenLat]
+ * @param {number|null} [origenLng]
  * @returns {number|null}
  */
-export function calculateTripPrice(destinoLat, destinoLng, zonas) {
-  const zona = findZoneForCoords(destinoLat, destinoLng, zonas)
-  return zona?.precio ?? null
+export function calculateTripPrice(destinoLat, destinoLng, zonas, origenLat = null, origenLng = null) {
+  const zonaDestino = findZoneForCoords(destinoLat, destinoLng, zonas)
+  const zonaOrigen  = findZoneForCoords(origenLat,  origenLng,  zonas)
+  const prices = [zonaDestino?.precio, zonaOrigen?.precio].filter(p => p != null)
+  return prices.length > 0 ? Math.max(...prices) : null
 }

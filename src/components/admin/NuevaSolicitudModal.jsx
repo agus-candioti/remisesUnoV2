@@ -4,7 +4,7 @@ import Modal from '../common/Modal.jsx'
 import Button from '../common/Button.jsx'
 import Input from '../common/Input.jsx'
 import AddressInput from '../booking/AddressInput.jsx'
-import { calculateTripPrice, findZoneForCoords } from '../../services/priceCalculator.js'
+import { findZoneForCoords } from '../../services/priceCalculator.js'
 import styles from './NuevaSolicitudModal.module.css'
 
 function normalizePhone(raw) {
@@ -13,6 +13,15 @@ function normalizePhone(raw) {
   if (d.startsWith('0')) d = d.slice(1)
   if (d.startsWith('15')) d = d.slice(2)
   return d
+}
+
+function resolvePrice(oLat, oLng, dLat, dLng, zonas) {
+  const zonaOrigen  = findZoneForCoords(oLat, oLng, zonas ?? [])
+  const zonaDestino = findZoneForCoords(dLat, dLng, zonas ?? [])
+  const candidatos  = [zonaOrigen, zonaDestino].filter(Boolean)
+  const top = candidatos.reduce((best, z) => (!best || z.precio > best.precio ? z : best), null)
+  const nombres = [...new Set([zonaOrigen?.nombre, zonaDestino?.nombre].filter(Boolean))]
+  return { precio: top?.precio ?? null, nombres }
 }
 
 const EMPTY = {
@@ -35,7 +44,7 @@ export default function NuevaSolicitudModal({ zonas, onClose, onCreate }) {
   const [form, setForm] = useState(EMPTY)
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
-  const [zonaDetectada, setZonaDetectada] = useState(null)
+  const [zonasDetectadas, setZonasDetectadas] = useState([])
 
   function set(field, value) {
     setForm(prev => ({ ...prev, [field]: value }))
@@ -43,38 +52,32 @@ export default function NuevaSolicitudModal({ zonas, onClose, onCreate }) {
   }
 
   function handleOrigenSelect(suggestion) {
-    if (!suggestion) {
-      set('origenLat', null)
-      set('origenLng', null)
-      return
-    }
+    const oLat = suggestion?.lat ?? null
+    const oLng = suggestion?.lng ?? null
+    const { precio, nombres } = resolvePrice(oLat, oLng, form.destinoLat, form.destinoLng, zonas)
     setForm(prev => ({
       ...prev,
-      origen: suggestion.value,
-      origenLat: suggestion.lat,
-      origenLng: suggestion.lng,
+      origen: suggestion?.value ?? prev.origen,
+      origenLat: oLat,
+      origenLng: oLng,
+      precioManual: precio != null ? String(precio) : prev.precioManual,
     }))
+    setZonasDetectadas(nombres)
     if (errors.origen) setErrors(prev => ({ ...prev, origen: null }))
   }
 
   function handleDestinoSelect(suggestion) {
-    if (!suggestion) {
-      setForm(prev => ({ ...prev, destinoLat: null, destinoLng: null }))
-      setZonaDetectada(null)
-      return
-    }
-    const { lat, lng } = suggestion
-    const zonaMatch = findZoneForCoords(lat, lng, zonas ?? [])
-    const precio = zonaMatch?.precio ?? null
-
+    const dLat = suggestion?.lat ?? null
+    const dLng = suggestion?.lng ?? null
+    const { precio, nombres } = resolvePrice(form.origenLat, form.origenLng, dLat, dLng, zonas)
     setForm(prev => ({
       ...prev,
-      destino: suggestion.value,
-      destinoLat: lat,
-      destinoLng: lng,
+      destino: suggestion?.value ?? prev.destino,
+      destinoLat: dLat,
+      destinoLng: dLng,
       precioManual: precio != null ? String(precio) : '',
     }))
-    setZonaDetectada(zonaMatch?.nombre ?? null)
+    setZonasDetectadas(nombres)
     if (errors.destino) setErrors(prev => ({ ...prev, destino: null }))
   }
 
@@ -221,16 +224,20 @@ export default function NuevaSolicitudModal({ zonas, onClose, onCreate }) {
         <div>
           <Input
             id="nsr-precio"
-            label="Precio estimado (ARS)"
+            label="Precio (ARS)"
             type="number"
             placeholder="0"
             value={form.precioManual}
             onChange={e => set('precioManual', e.target.value)}
+            hint="Siempre podés editar este valor"
           />
-          {zonaDetectada ? (
-            <p className={styles.priceHint}>Calculado automaticamente — zona: {zonaDetectada}</p>
-          ) : form.destinoLat != null ? (
-            <p className={styles.priceHint}>Sin zona asignada — ingresa un precio manualmente si corresponde</p>
+          {zonasDetectadas.length > 0 ? (
+            <p className={styles.priceHint}>
+              Zona{zonasDetectadas.length > 1 ? 's' : ''} detectada{zonasDetectadas.length > 1 ? 's' : ''}: {zonasDetectadas.join(' · ')}
+              {zonasDetectadas.length > 1 && ' — se aplica el mayor precio'}
+            </p>
+          ) : (form.destinoLat != null || form.origenLat != null) ? (
+            <p className={styles.priceHint}>Sin zona detectada — podés ingresar el precio manualmente</p>
           ) : null}
         </div>
 

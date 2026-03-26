@@ -1,15 +1,16 @@
 /**
- * Address autocomplete service.
- * Delegates to Nominatim (OpenStreetMap). No API key required.
- * To switch to Google Places: replace searchNominatim import and call.
+ * Address autocomplete service — backed by Google Places API (New).
+ * searchAddress returns suggestions with placeId but no coords yet.
+ * getPlaceCoords resolves coords for the selected placeId.
  */
-import { searchNominatim } from './geocoding.js'
+import { searchGooglePlaces, getPlaceCoords } from './geocoding.js'
 
 /**
- * Search for address suggestions matching a query string.
  * @param {string} query
- * @returns {Promise<Array<{label: string, value: string, lat: number, lng: number}>>}
+ * @returns {Promise<import('./geocoding.js').GeoSuggestion[]>}
  */
 export async function searchAddress(query) {
-  return searchNominatim(query)
+  return searchGooglePlaces(query)
 }
+
+export { getPlaceCoords }

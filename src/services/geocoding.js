@@ -1,82 +1,99 @@
 /**
- * Nominatim geocoding service (OpenStreetMap).
- * Free, no API key required. Rate-limited — keep debounce >= 300ms on callers.
- * To migrate to Google Places: replace searchNominatim body, keep same return shape.
+ * Google Places API (New) geocoding service.
+ * Uses the Places Autocomplete endpoint (v1) which is CORS-compatible for
+ * browser requests. Requires VITE_GOOGLE_PLACES_API_KEY in .env.local.
+ *
+ * Flow:
+ *   1. searchGooglePlaces(query)  → suggestions with placeId (no coords yet)
+ *   2. getPlaceCoords(placeId)    → { lat, lng } fetched when user selects
  */
 
 /**
- * @typedef {{ label: string, value: string, lat: number, lng: number }} GeoSuggestion
+ * @typedef {{ label: string, value: string, placeId: string, lat: number|null, lng: number|null }} GeoSuggestion
  */
 
-// Bounding box covering Campana and the broader Zona Norte / Buenos Aires metro area.
-// Format: left (min_lon), top (max_lat), right (max_lon), bottom (min_lat)
-// Covers: Campana, Zárate, Escobar, Pilar, Tigre, San Isidro, Buenos Aires city.
-const VIEWBOX = '-59.5,-33.0,-57.5,-35.5'
+const KEY = import.meta.env.VITE_GOOGLE_PLACES_API_KEY
 
-/**
- * Build a concise human-readable address label from Nominatim's addressdetails.
- * e.g. "Arenaza 2175, Campana"  instead of the full verbose display_name.
- */
-function buildLabel(item) {
-  const a = item.address
-  if (!a) return item.display_name
-
-  const parts = []
-
-  // Street + house number
-  if (a.road) {
-    parts.push(a.house_number ? `${a.road} ${a.house_number}` : a.road)
-  } else if (a.pedestrian || a.path) {
-    parts.push(a.pedestrian || a.path)
-  } else if (item.type === 'amenity' || item.type === 'shop') {
-    // Named place with no road — use the name directly
-    parts.push(item.name ?? item.display_name.split(',')[0])
-  }
-
-  // City / town / village
-  const locality = a.city ?? a.town ?? a.village ?? a.municipality ?? a.county
-  if (locality) parts.push(locality)
-
-  return parts.length > 0 ? parts.join(', ') : item.display_name
+// Bias searches toward Campana and the Zona Norte / Buenos Aires metro area.
+const LOCATION_BIAS = {
+  circle: {
+    center: { latitude: -34.167, longitude: -58.957 },
+    radius: 80000, // 80 km covers Buenos Aires metro + Zona Norte
+  },
 }
 
 /**
- * Search for address suggestions using Nominatim.
- * Results are restricted to the Campana / Buenos Aires Zona Norte area.
+ * Autocomplete address suggestions via Google Places (New) API.
+ * Returns suggestions with placeId; coordinates are null until the user selects.
  * @param {string} query
  * @returns {Promise<GeoSuggestion[]>}
  */
-export async function searchNominatim(query) {
+export async function searchGooglePlaces(query) {
   if (!query || query.trim().length < 3) return []
+  if (!KEY) {
+    console.warn('[geocoding] VITE_GOOGLE_PLACES_API_KEY is not set')
+    return []
+  }
   try {
-    const params = new URLSearchParams({
-      q: query,
-      format: 'json',
-      limit: '6',
-      countrycodes: 'ar',
-      addressdetails: '1',
-      viewbox: VIEWBOX,
-      // No bounded=1: viewbox biases results toward Campana/BA area but
-      // still returns results if the exact address isn't in OSM locally.
+    const res = await fetch('https://places.googleapis.com/v1/places:autocomplete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': KEY,
+      },
+      body: JSON.stringify({
+        input: query,
+        locationBias: LOCATION_BIAS,
+        languageCode: 'es',
+        regionCode: 'AR',
+        includedPrimaryTypes: ['address'],
+      }),
     })
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?${params}`,
-      { headers: { 'Accept-Language': 'es', 'User-Agent': 'UNO Remises App' } }
-    )
     if (!res.ok) return []
     const data = await res.json()
+    if (!data.suggestions) return []
 
-    // Build clean labels and deduplicate (two results can produce the same short label)
-    const seen = new Set()
-    return data.reduce((acc, item) => {
-      const label = buildLabel(item)
-      if (!seen.has(label)) {
-        seen.add(label)
-        acc.push({ label, value: label, lat: parseFloat(item.lat), lng: parseFloat(item.lon) })
-      }
-      return acc
-    }, [])
-  } catch {
+    return data.suggestions
+      .filter(s => s.placePrediction)
+      .map(s => {
+        const pred = s.placePrediction
+        // Use structuredFormat for a cleaner label when available
+        const label = pred.structuredFormat
+          ? `${pred.structuredFormat.mainText.text}, ${pred.structuredFormat.secondaryText.text}`
+          : pred.text.text
+        return {
+          label,
+          value: label,
+          placeId: pred.placeId,
+          lat: null,
+          lng: null,
+        }
+      })
+  } catch (e) {
+    console.error('[geocoding] autocomplete error:', e)
     return []
+  }
+}
+
+/**
+ * Fetch coordinates for a Google place ID.
+ * Called once when the user selects a suggestion from the dropdown.
+ * @param {string} placeId
+ * @returns {Promise<{lat: number, lng: number}|null>}
+ */
+export async function getPlaceCoords(placeId) {
+  if (!KEY || !placeId) return null
+  try {
+    const res = await fetch(
+      `https://places.googleapis.com/v1/places/${placeId}?fields=location`,
+      { headers: { 'X-Goog-Api-Key': KEY } }
+    )
+    if (!res.ok) return null
+    const data = await res.json()
+    if (!data.location) return null
+    return { lat: data.location.latitude, lng: data.location.longitude }
+  } catch (e) {
+    console.error('[geocoding] place details error:', e)
+    return null
   }
 }

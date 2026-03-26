@@ -18,7 +18,7 @@ const KEY = import.meta.env.VITE_GOOGLE_PLACES_API_KEY
 const LOCATION_BIAS = {
   circle: {
     center: { latitude: -34.167, longitude: -58.957 },
-    radius: 80000, // 80 km covers Buenos Aires metro + Zona Norte
+    radius: 50000, // max allowed by the API; covers Campana + Buenos Aires metro
   },
 }
 
@@ -46,7 +46,6 @@ export async function searchGooglePlaces(query) {
         locationBias: LOCATION_BIAS,
         languageCode: 'es',
         regionCode: 'AR',
-        includedPrimaryTypes: ['address'],
       }),
     })
     if (!res.ok) {

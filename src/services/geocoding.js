@@ -49,7 +49,11 @@ export async function searchGooglePlaces(query) {
         includedPrimaryTypes: ['address'],
       }),
     })
-    if (!res.ok) return []
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      console.error('[geocoding] autocomplete failed:', res.status, err?.error?.message ?? err)
+      return []
+    }
     const data = await res.json()
     if (!data.suggestions) return []
 
@@ -85,10 +89,19 @@ export async function getPlaceCoords(placeId) {
   if (!KEY || !placeId) return null
   try {
     const res = await fetch(
-      `https://places.googleapis.com/v1/places/${placeId}?fields=location`,
-      { headers: { 'X-Goog-Api-Key': KEY } }
+      `https://places.googleapis.com/v1/places/${placeId}`,
+      {
+        headers: {
+          'X-Goog-Api-Key': KEY,
+          'X-Goog-FieldMask': 'location',
+        },
+      }
     )
-    if (!res.ok) return null
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      console.error('[geocoding] place details failed:', res.status, err?.error?.message ?? err)
+      return null
+    }
     const data = await res.json()
     if (!data.location) return null
     return { lat: data.location.latitude, lng: data.location.longitude }

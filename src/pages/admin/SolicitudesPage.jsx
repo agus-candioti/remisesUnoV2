@@ -36,7 +36,7 @@ function formatTs(ts, tipo) {
 }
 
 export default function SolicitudesPage() {
-  const { solicitudes, loading, updateEstado, finalizarViaje, assignDriver, assignZona, createSolicitud } = useSolicitudesCtx()
+  const { solicitudes, loading, updateEstado, finalizarViaje, assignDriver, assignZona, createSolicitud, updatePrecio } = useSolicitudesCtx()
   const { choferes } = useChoferes()
   const { zonas } = useZonas()
 
@@ -243,6 +243,7 @@ export default function SolicitudesPage() {
           onEstado={(id, estado) => { handleEstado(id, estado); setSelected(null) }}
           onOpenDispatch={s => { setSelected(null); openDispatch(s) }}
           onFinalizarViaje={s => { handleFinalizarViaje(s); setSelected(null) }}
+          onUpdatePrecio={updatePrecio}
         />
       )}
 

@@ -127,6 +127,47 @@
   font-weight: 700;
 }
 
+.priceEditRow {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.priceCurrency {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-brand);
+}
+
+.priceInput {
+  width: 110px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-brand);
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid transparent;
+  border-radius: 0;
+  padding: 1px 2px;
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color var(--transition-fast);
+  /* hide browser spinners */
+  -moz-appearance: textfield;
+}
+.priceInput::-webkit-outer-spin-button,
+.priceInput::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.priceInput:hover  { border-bottom-color: var(--color-border); }
+.priceInput:focus  { border-bottom-color: var(--color-brand); }
+
+.savedHint {
+  font-size: 0.65rem;
+  color: var(--color-finished);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: lowercase;
+}
+
 .patente {
   font-family: monospace;
   font-size: 0.8rem;

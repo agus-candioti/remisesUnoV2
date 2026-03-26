@@ -64,5 +64,9 @@ export function useSolicitudes() {
     await SolicitudesRepository.create(data)
   }
 
-  return { solicitudes, loading, error, updateEstado, finalizarViaje, assignDriver, assignZona, updateNotas, createSolicitud }
+  async function updatePrecio(id, precio) {
+    await SolicitudesRepository.update(id, { precioEstimado: precio ?? null })
+  }
+
+  return { solicitudes, loading, error, updateEstado, finalizarViaje, assignDriver, assignZona, updateNotas, createSolicitud, updatePrecio }
 }

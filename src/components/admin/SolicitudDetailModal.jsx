@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import Modal from '../common/Modal.jsx'
 import Button from '../common/Button.jsx'
 import StatusBadge from '../common/StatusBadge.jsx'
@@ -43,9 +44,20 @@ function customerWaLink(s) {
  *   onOpenDispatch: function(solicitud),
  * }} props
  */
-export default function SolicitudDetailModal({ solicitud: s, choferes, onClose, onEstado, onOpenDispatch, onFinalizarViaje }) {
+export default function SolicitudDetailModal({ solicitud: s, choferes, onClose, onEstado, onOpenDispatch, onFinalizarViaje, onUpdatePrecio }) {
   const chofer = choferes?.find(c => c.id === s.choferAsignado)
   const shortId = s.id.slice(-6).toUpperCase()
+
+  const [priceInput, setPriceInput] = useState(s.precioEstimado != null ? String(s.precioEstimado) : '')
+  const [priceSaved, setPriceSaved] = useState(false)
+
+  async function handlePriceBlur() {
+    const num = priceInput.trim() === '' ? null : Number(priceInput)
+    if (num === s.precioEstimado) return
+    await onUpdatePrecio(s.id, num)
+    setPriceSaved(true)
+    setTimeout(() => setPriceSaved(false), 2000)
+  }
 
   return (
     <Modal title="" onClose={onClose} size="md">
@@ -88,8 +100,22 @@ export default function SolicitudDetailModal({ solicitud: s, choferes, onClose, 
             <span className={styles.metaValue}>{formatTs(s.fecha, s.tipo)}</span>
           </div>
           <div className={styles.metaItem}>
-            <span className={styles.metaLabel}>Precio estimado</span>
-            <span className={`${styles.metaValue} ${styles.price}`}>{formatPrice(s.precioEstimado)}</span>
+            <span className={styles.metaLabel}>
+              Precio estimado
+              {priceSaved && <span className={styles.savedHint}> — guardado</span>}
+            </span>
+            <div className={styles.priceEditRow}>
+              <span className={styles.priceCurrency}>$</span>
+              <input
+                className={styles.priceInput}
+                type="number"
+                min="0"
+                value={priceInput}
+                onChange={e => { setPriceInput(e.target.value); setPriceSaved(false) }}
+                onBlur={handlePriceBlur}
+                placeholder="—"
+              />
+            </div>
           </div>
           {chofer && (
             <div className={styles.metaItem}>
